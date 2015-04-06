@@ -122,11 +122,11 @@ module.exports.getIPAddress = function(domain) {
 
 module.exports.getNameServer = function(domain, index) {
   if (config.domains[domain]) {
-    return config.host.nameserver[index];
+    return config.host.nameservers[index];
   } else if (typeof config.neighboring[domain] === 'object'
-      && typeof config.neighboring[domain].nameserver === 'object'
-      && typeof config.neighboring[domain].nameserver[index] === 'string') {
-    return config.neighboring[domain].nameserver[index];
+      && typeof config.neighboring[domain].nameservers === 'object'
+      && typeof config.neighboring[domain].nameservers[index] === 'string') {
+    return config.neighboring[domain].nameservers[index];
   } else {
     return false;
   }
@@ -143,23 +143,37 @@ module.exports.getMailServer = function(domain) {
 }
 
 module.exports.updateConfig = function(confObj) {
-  if (typeof confObj === 'object'
-      && typeof confObj.domains === 'object'
-      && typeof confObj.neighboring === 'object'
-      && typeof confObj.host === 'object'
-      && typeof confObj.host.ipaddress === 'string'
-      && typeof confObj.host.nameserver === 'object'
-      && typeof confObj.host.nameserver[1] === 'string'
-      && typeof confObj.host.nameserver[2] === 'string'
-      && typeof confObj.host.mailserver === 'string'
-      && typeof confObj.images === 'object'
-      && Array.isArray(confObj.images.upstream)
-      && Array.isArray(confObj.images.intermediate)
-      && Array.isArray(confObj.images.target)
-      && typeof confObj.backupServerPaths === 'object'
-      && typeof confObj.backupServerPaths.origin === 'string'
-      && typeof confObj.backupServerPaths.secondary === 'string') {
-      
+  var failedCheck;
+  function checkType(thing, type, name) {
+    if (typeof thing === type) {
+      return true;
+    } else {
+      failedCheck = 'Type of '+name+' should be '+type;
+    }
+  }
+  function checkArray(thing, name) {
+    if (Array.isArray(thing)) {
+      return true;
+    } else {
+      failedCheck = name+' should be an Array';
+    }
+  }
+  if (checkType(confObj, 'object', 'confObj')
+      && checkType(confObj.domains, 'object', 'confObj.domains')
+      && checkType(confObj.neighboring, 'object', 'confObj.neighboring')
+      && checkType(confObj.host, 'object', 'confObj.host')
+      && checkType(confObj.host.ipaddress, 'string', 'confObj.host.ipaddress')
+      && checkType(confObj.host.nameservers, 'object', 'confObj.host.nameservers')
+      && checkType(confObj.host.nameservers[1], 'string', 'confObj.host.nameservers[1] should be a string')
+      && checkType(confObj.host.nameservers[2], 'string', 'confObj.host.nameservers[2] should be a string')
+      && checkType(confObj.host.mailserver, 'string', 'confObj.host.mailserver')
+      && checkType(confObj.images, 'object', 'confObj.images')
+      && checkArray(confObj.images.upstream, 'confObj.images.upstream')
+      && checkArray(confObj.images.intermediate, 'confObj.images.intermediate')
+      && checkArray(confObj.images.target, 'confObj.images.target')
+      && checkType(confObj.backupServerPaths, 'object', 'confObj.backupServerPaths')
+      && checkType(confObj.backupServerPaths.origin, 'string', 'confObj.backupServerPaths.origin')
+      && checkType(confObj.backupServerPaths.secondary, 'string', 'confObj.backupServerPaths.secondary')) {
     backends.rebuildAll(confObj.images, function(err) {
       if (err) {
         console.log('error rebuilding images', err);
@@ -180,6 +194,6 @@ module.exports.updateConfig = function(confObj) {
       }
     });
   } else {
-    console.log('Please format your config.js file like config.js.sample');
+    console.log('Please format your config.js file like config.js.sample', failedCheck);
   }
 }

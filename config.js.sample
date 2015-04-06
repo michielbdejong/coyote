@@ -1,5 +1,14 @@
 //Simple tool to write config.json:
 require('./config-reader').updateConfig({
+  host: {
+    nameservers: {
+      1: 'abcd',
+      2: 'efgh'
+    },
+    ipaddress: '8.9.7.6',
+    mailserver: 'ijkl'
+  },
+  neighboring: {},
   domains: {
     'test.com': {
       type: 'backend', //see 'backends/' folder in this repo
