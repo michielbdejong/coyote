@@ -110,9 +110,48 @@ module.exports.getBackendTarPath = function(application) {
   return '../snickers-applications/tar/' + application + '.tar';
 };
 
+module.exports.getIPAddress = function(domain) {
+  if (config.domains[domain]) {
+    return config.host.ipaddress;
+  } else if (typeof config.neighboring[domain] === 'object' && typeof config.neighboring[domain].ipaddress === 'string') {
+    return config.neighboring[domain].ipaddress;
+  } else {
+    return false;
+  }
+}
+
+module.exports.getNameServer = function(domain, index) {
+  if (config.domains[domain]) {
+    return config.host.nameserver[index];
+  } else if (typeof config.neighboring[domain] === 'object'
+      && typeof config.neighboring[domain].nameserver === 'object'
+      && typeof config.neighboring[domain].nameserver[index] === 'string') {
+    return config.neighboring[domain].nameserver[index];
+  } else {
+    return false;
+  }
+}
+
+module.exports.getMailServer = function(domain) {
+  if (config.domains[domain]) {
+    return config.host.mailserver;
+  } else if (typeof config.neighboring[domain] === 'object' && typeof config.neighboring[domain].mailserver === 'string') {
+    return config.neighboring[domain].mailserver;
+  } else {
+    return false;
+  }
+}
+
 module.exports.updateConfig = function(confObj) {
   if (typeof confObj === 'object'
       && typeof confObj.domains === 'object'
+      && typeof confObj.neighboring === 'object'
+      && typeof confObj.host === 'object'
+      && typeof confObj.host.ipaddress === 'string'
+      && typeof confObj.host.nameserver === 'object'
+      && typeof confObj.host.nameserver[1] === 'string'
+      && typeof confObj.host.nameserver[2] === 'string'
+      && typeof confObj.host.mailserver === 'string'
       && typeof confObj.images === 'object'
       && Array.isArray(confObj.images.upstream)
       && Array.isArray(confObj.images.intermediate)
